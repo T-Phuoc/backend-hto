@@ -9,6 +9,7 @@ export class AppController {
       name: 'backend-hto',
       status: 'running',
       apiVersion: API_VERSION,
+      author: 'DucToanDev',
     };
   }
 }
