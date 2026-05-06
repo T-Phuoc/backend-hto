@@ -1,0 +1,69 @@
+name: backend-hto
+
+services:
+  app:
+    image: ${APP_IMAGE:-backend-hto:local}
+    build:
+      context: .
+      dockerfile: ${DOCKERFILE:-Dockerfile.backend-hto}
+    container_name: ${APP_CONTAINER_NAME:-backend-hto-app}
+    restart: unless-stopped
+    env_file:
+      - path: ${APP_ENV_FILE:-.env}
+        required: false
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${CONTAINER_PORT:-8080}
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    ports:
+      - "${APP_PORT:-8080}:${CONTAINER_PORT:-8080}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:${CONTAINER_PORT:-8080}${HEALTHCHECK_PATH:-/api/v1/health} >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - backend-hto
+
+  mongo:
+    image: mongo:7
+    profiles:
+      - mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-backend_hto}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-change_me}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-hito_crm}
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    networks:
+      - backend-hto
+
+  redis:
+    image: redis:7-alpine
+    profiles:
+      - redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - backend-hto
+
+networks:
+  backend-hto:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:
