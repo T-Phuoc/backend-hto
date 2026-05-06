@@ -11,6 +11,10 @@ env:
   REGISTRY: ghcr.io
   COMPOSE_FILE: docker-compose.cicd.yml
   DOCKERFILE: Dockerfile.backend-hto
+  DEFAULT_APP_PORT: "3006"
+  DEFAULT_CONTAINER_PORT: "8080"
+  DEFAULT_COMPOSE_PROJECT_NAME: backend-hto-qlnb
+  DEFAULT_APP_CONTAINER_NAME: backend-hto-qlnb-app
 
 jobs:
   build:
@@ -104,8 +108,10 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           APP_IMAGE: ${{ needs.build.outputs.image }}:${{ needs.build.outputs.tag }}
-          APP_PORT: ${{ vars.APP_PORT || '8080' }}
-          CONTAINER_PORT: ${{ vars.CONTAINER_PORT || '8080' }}
+          APP_PORT: ${{ vars.APP_PORT || env.DEFAULT_APP_PORT }}
+          CONTAINER_PORT: ${{ vars.CONTAINER_PORT || env.DEFAULT_CONTAINER_PORT }}
+          COMPOSE_PROJECT_NAME: ${{ vars.COMPOSE_PROJECT_NAME || env.DEFAULT_COMPOSE_PROJECT_NAME }}
+          APP_CONTAINER_NAME: ${{ vars.APP_CONTAINER_NAME || env.DEFAULT_APP_CONTAINER_NAME }}
           COMPOSE_PROFILES: ${{ vars.COMPOSE_PROFILES }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME || github.actor }}
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
@@ -119,10 +125,14 @@ jobs:
              APP_IMAGE='$APP_IMAGE' \
              APP_PORT='$APP_PORT' \
              CONTAINER_PORT='$CONTAINER_PORT' \
+             COMPOSE_PROJECT_NAME='$COMPOSE_PROJECT_NAME' \
+             APP_CONTAINER_NAME='$APP_CONTAINER_NAME' \
              COMPOSE_PROFILES='$COMPOSE_PROFILES' \
              docker compose pull app && \
              APP_IMAGE='$APP_IMAGE' \
              APP_PORT='$APP_PORT' \
              CONTAINER_PORT='$CONTAINER_PORT' \
+             COMPOSE_PROJECT_NAME='$COMPOSE_PROJECT_NAME' \
+             APP_CONTAINER_NAME='$APP_CONTAINER_NAME' \
              COMPOSE_PROFILES='$COMPOSE_PROFILES' \
              docker compose up -d --remove-orphans"

@@ -1,4 +1,4 @@
-name: backend-hto
+name: ${COMPOSE_PROJECT_NAME:-backend-hto-qlnb}
 
 services:
   app:
