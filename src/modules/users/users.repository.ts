@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 import { DatabaseService } from '../../database/database.service';
 
 @Injectable()
@@ -15,6 +16,13 @@ export class UsersRepository {
   }
 
   async findById(id: string) {
-    return await this.collection.findOne({ _id: id as any, deletedAt: null });
+    const idFilter = ObjectId.isValid(id)
+      ? { $in: [new ObjectId(id), id] }
+      : id;
+
+    return await this.collection.findOne({
+      _id: idFilter as any,
+      deletedAt: null,
+    });
   }
 }
