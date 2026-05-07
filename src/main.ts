@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { API_PREFIX, API_VERSION } from './common/constants/app.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -16,6 +17,7 @@ async function bootstrap() {
   app.setGlobalPrefix(`${API_PREFIX}/${API_VERSION}`, {
     exclude: [{ path: '/', method: RequestMethod.GET }],
   });
+  app.use(requestIdMiddleware);
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('HTO API')
