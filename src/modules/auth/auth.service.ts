@@ -13,7 +13,7 @@ export class AuthService {
 
   async validateUser(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
-    
+
     // 1. Tìm user theo email
     const user = await this.usersService.findByEmail(email);
     if (!user) {
@@ -23,7 +23,9 @@ export class AuthService {
     // 2. Kiểm tra mật khẩu (Sử dụng trường "password" từ DB)
     const dbPassword = user.password;
     if (!dbPassword) {
-      throw new UnauthorizedException('Cấu trúc dữ liệu người dùng không hợp lệ');
+      throw new UnauthorizedException(
+        'Cấu trúc dữ liệu người dùng không hợp lệ',
+      );
     }
 
     // So sánh mật khẩu (Đang dùng so sánh chuỗi để test với dữ liệu mẫu)
@@ -45,20 +47,27 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { 
-      sub: user._id, 
+    const userId = user._id?.toString();
+    if (!userId) {
+      throw new UnauthorizedException(
+        'Cấu trúc dữ liệu người dùng không hợp lệ',
+      );
+    }
+
+    const payload = {
+      sub: userId,
       email: user.email,
-      roleId: user.roleId 
+      roleId: user.roleId,
     };
-    
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user._id,
+        id: userId,
         fullName: user.fullName,
         email: user.email,
-        avatarUrl: user.avatarUrl
-      }
+        avatarUrl: user.avatarUrl,
+      },
     };
   }
 }

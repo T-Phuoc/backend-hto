@@ -20,11 +20,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Tìm lại user từ database để đảm bảo user vẫn tồn tại và active
     const user = await this.usersService.findById(payload.sub);
-    
-    if (!user || user.status !== 'active') {
-      throw new UnauthorizedException('Người dùng không hợp lệ hoặc đã bị khóa');
+
+    if (!user || (user.status && user.status !== 'active')) {
+      throw new UnauthorizedException(
+        'Người dùng không hợp lệ hoặc đã bị khóa',
+      );
     }
 
-    return user; // Thông tin này sẽ được gán vào req.user
+    const { password: _password, ...safeUser } = user;
+    return safeUser;
   }
 }

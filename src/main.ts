@@ -1,6 +1,7 @@
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { API_PREFIX, API_VERSION } from './common/constants/app.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
@@ -15,6 +16,21 @@ async function bootstrap() {
   app.setGlobalPrefix(`${API_PREFIX}/${API_VERSION}`, {
     exclude: [{ path: '/', method: RequestMethod.GET }],
   });
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('HTO API')
+    .setDescription('HTO backend API documentation')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(`${API_PREFIX}/docs`, app, swaggerDocument);
+  SwaggerModule.setup(
+    `${API_PREFIX}/${API_VERSION}/docs`,
+    app,
+    swaggerDocument,
+  );
+
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
