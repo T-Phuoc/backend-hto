@@ -36,7 +36,7 @@ describe('HttpExceptionFilter', () => {
         [REQUEST_ID_HEADER]: 'req-400',
       },
       ip: '127.0.0.1',
-    } as RequestWithId;
+    } as unknown as RequestWithId;
     const response = {
       setHeader: jest.fn(),
       status: jest.fn().mockReturnThis(),
@@ -84,7 +84,7 @@ describe('HttpExceptionFilter', () => {
         [REQUEST_ID_HEADER]: 'req-500',
       },
       ip: '127.0.0.1',
-    } as RequestWithId;
+    } as unknown as RequestWithId;
     const response = {
       setHeader: jest.fn(),
       status: jest.fn().mockReturnThis(),

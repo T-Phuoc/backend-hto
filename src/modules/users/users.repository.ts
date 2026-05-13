@@ -4,7 +4,7 @@ import { DatabaseService } from '../../database/database.service';
 
 @Injectable()
 export class UsersRepository {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   private get collection() {
     return this.databaseService.collection('users');
