@@ -6,7 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-// import { SearchModule } from './modules/search/search.module';
+import { SearchModule } from './modules/search/search.module';
 
 
 @Module({
@@ -20,7 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
     HealthModule,
     UsersModule,
     AuthModule,
-    //SearchModule,
+    SearchModule,
   ],
   controllers: [AppController],
 })
