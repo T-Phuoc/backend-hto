@@ -11,8 +11,11 @@ export class UsersRepository {
   }
 
   async findByEmail(email: string) {
-    // Tìm kiếm user theo email trong MongoDB
-    return await this.collection.findOne({ email, deletedAt: null });
+    // Tìm kiếm user theo email trong MongoDB, hỗ trợ cả deletedAt là null hoặc không tồn tại
+    return await this.collection.findOne({
+      email,
+      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+    });
   }
 
   async findById(id: string) {
@@ -22,7 +25,7 @@ export class UsersRepository {
 
     return await this.collection.findOne({
       _id: idFilter as any,
-      deletedAt: null,
+      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
     });
   }
 }

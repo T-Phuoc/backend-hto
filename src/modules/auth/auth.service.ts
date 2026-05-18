@@ -17,7 +17,6 @@ export class AuthService {
     const { email, password } = loginDto;
 
     // 1. Tìm user theo email
-    // 1. Tìm user theo email
     const user = await this.usersService.findByEmail(email);
     
     if (!user) {
@@ -34,7 +33,6 @@ export class AuthService {
 
     // So sánh mật khẩu
     const isPasswordMatching = await bcrypt.compare(password, dbPassword);
-    //const isPasswordMatching = (password === dbPassword);
 
     if (!isPasswordMatching) {
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');

@@ -1,16 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
-import { DatabaseService } from '../../database/database.service';
+import { Injectable } from '@nestjs/common';
 import { SearchDocumentDto } from './dto/search-document.dto';
 import { ROLE_IDS } from '../../common/constants/role.constants';
+import { SearchRepository } from './search.repository';
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly databaseService: DatabaseService) { }
-
-  private get documentCollection() {
-    return this.databaseService.collection('documents');
-  }
+  constructor(private readonly searchRepository: SearchRepository) { }
 
   async searchDocuments(query: SearchDocumentDto, user?: any) {
     const { keyword, limit = 10, page = 1 } = query;
@@ -24,8 +19,8 @@ export class SearchService {
       
       // 1. Tìm các Danh mục hoặc Phòng ban có tên chứa từ khóa
       const [categories, departments] = await Promise.all([
-        this.databaseService.collection('document_categories').find({ name: searchRegex }).toArray(),
-        this.databaseService.collection('departments').find({ name: searchRegex }).toArray()
+        this.searchRepository.findCategories({ name: searchRegex }),
+        this.searchRepository.findDepartments({ name: searchRegex })
       ]);
 
       const catIds = categories.flatMap(c => [c._id, c.id].filter(id => id != null));
@@ -43,7 +38,7 @@ export class SearchService {
       ];
     }
 
-    // --- LOGIC PHÂN QUYỀN (GIỮ NGUYÊN) ---
+    // --- LOGIC PHÂN QUYỀN ---
     const ROLE_ADMIN = ROLE_IDS.ADMIN;
     const ROLE_BGD = ROLE_IDS.BGD;
 
@@ -74,17 +69,24 @@ export class SearchService {
     }
 
     const [items, total] = await Promise.all([
-      this.documentCollection
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit))
-        .toArray(),
-      this.documentCollection.countDocuments(filter),
+      this.searchRepository.findDocuments(filter, {
+        skip,
+        limit: Number(limit),
+        sort: { createdAt: -1 }
+      }),
+      this.searchRepository.countDocuments(filter),
     ]);
 
     if (total === 0) {
-      throw new NotFoundException('Quyền hạn bạn không đủ');
+      return {
+        items: [],
+        meta: {
+          total: 0,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: 0,
+        },
+      };
     }
 
     return {
